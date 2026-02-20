@@ -11,7 +11,7 @@ Docker Composeを使用してGitHub Actionsのセルフホステッドランナ�
 | 223n/CatPro-Cloudflare   | 2          | pnpm                   | CI + E2E                 |
 | 223n/sleep-diary         | 1          | pnpm                   | ワークフローが少ない     |
 | 223n/devcontainer-base   | 1          | -                      | 手動実行のみ             |
-| 223n/my-okusuri-book     | 2          | pnpm                   | CI + deploy              |
+| 223n/okusuri.223n.tech   | 2          | pnpm                   | CI + deploy              |
 | 223n-tech/haru.223n.tech | 2          | pnpm                   | deploy + scheduled-build |
 
 合計: **14台**

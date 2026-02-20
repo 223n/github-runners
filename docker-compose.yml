@@ -139,8 +139,8 @@ services:
       REPO_URL: https://github.com/223n/devcontainer-base
       RUNNER_NAME: local-devcontainer-base
 
-  # === my-okusuri-book (2台: CI + deploy, pnpm) ===
-  runner-my-okusuri-book-1:
+  # === okusuri.223n.tech (2台: CI + deploy, pnpm) ===
+  runner-okusuri-223n-tech-1:
     <<: *runner-base
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -148,10 +148,10 @@ services:
       - okusuri-pnpm-store:/root/.local/share/pnpm/store
     environment:
       <<: *runner-env
-      REPO_URL: https://github.com/223n/my-okusuri-book
-      RUNNER_NAME: local-my-okusuri-book-1
+      REPO_URL: https://github.com/223n/okusuri.223n.tech
+      RUNNER_NAME: local-okusuri-223n-tech-1
 
-  runner-my-okusuri-book-2:
+  runner-okusuri-223n-tech-2:
     <<: *runner-base
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -159,8 +159,8 @@ services:
       - okusuri-pnpm-store:/root/.local/share/pnpm/store
     environment:
       <<: *runner-env
-      REPO_URL: https://github.com/223n/my-okusuri-book
-      RUNNER_NAME: local-my-okusuri-book-2
+      REPO_URL: https://github.com/223n/okusuri.223n.tech
+      RUNNER_NAME: local-okusuri-223n-tech-2
 
   # === 223n-tech organization ===
   # === haru.223n.tech (2台: deploy + scheduled-build, pnpm) ===
@@ -201,7 +201,7 @@ volumes:
   sleep-pnpm-store:
   # devcontainer-base
   devcontainer-toolcache:
-  # my-okusuri-book
+  # okusuri.223n.tech
   okusuri-toolcache:
   okusuri-pnpm-store:
   # haru.223n.tech
