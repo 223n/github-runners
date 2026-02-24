@@ -21,7 +21,7 @@ param(
     [string]$Command = "help",
 
     [Parameter(Position = 1, ValueFromRemainingArguments)]
-    [string[]]$Args
+    [string[]]$ExtraArgs
 )
 
 Set-StrictMode -Version Latest
@@ -174,7 +174,7 @@ try {
         "stop"    { Invoke-ComposeStop }
         "restart" { Invoke-ComposeRestart }
         "status"  { Invoke-ComposeStatus }
-        "logs"    { Invoke-ComposeLogs -ServiceNames $Args }
+        "logs"    { Invoke-ComposeLogs -ServiceNames $ExtraArgs }
         "clean"   { Invoke-ComposeClean }
         "help"    { Show-Usage }
     }
