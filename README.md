@@ -40,18 +40,24 @@ docker compose up -d
 
 ## 基本操作
 
+管理スクリプト（`runner.ps1`）を使用します。Docker Desktopが未起動の場合は自動で起動します。
+
+```powershell
+.\runner.ps1 start              # ランナーを起動（Docker Desktop自動起動）
+.\runner.ps1 stop               # ランナーを停止（GitHub登録自動解除）
+.\runner.ps1 restart            # ランナーを再起動
+.\runner.ps1 status             # ランナーの状態を表示
+.\runner.ps1 logs               # 全ランナーのログを表示
+.\runner.ps1 logs runner-sleep-diary  # 特定ランナーのログを表示
+.\runner.ps1 clean              # 停止 + キャッシュボリューム全削除
+```
+
+docker composeコマンドを直接使用することもできます。
+
 ```bash
-# 全ランナーの状態確認
+docker compose up -d
 docker compose ps
-
-# 特定ランナーのログ確認
-docker compose logs -f runner-kigurumi-event-hub-1
-
-# 全ランナーの停止（自動的にGitHubからランナー登録解除）
 docker compose down
-
-# 停止 + キャッシュボリューム全削除
-docker compose down -v
 ```
 
 ## キャッシュ管理
@@ -82,5 +88,6 @@ docker compose up -d
 ├── .gitattributes      # 改行コード設定
 ├── .gitignore
 ├── docker-compose.yml  # ランナー定義
+├── runner.ps1          # 管理スクリプト（PowerShell）
 └── README.md
 ```
