@@ -13,16 +13,21 @@
 # キャッシュ管理:
 #   docker volume ls | grep github-runners  # キャッシュボリューム一覧
 #   docker compose down -v                  # 停止+キャッシュ全削除
+#
+# Docker Desktop アップデート後の復旧:
+#   docker compose up -d  # REPLACE_EXISTING_RUNNER により自動復旧
 
 x-runner-base: &runner-base
   image: myoung34/github-runner:ubuntu-jammy
   restart: unless-stopped
+  stop_grace_period: 30s
 
 x-runner-env: &runner-env
   ACCESS_TOKEN: ${GITHUB_PAT}
   RUNNER_WORKDIR: /tmp/runner/work
   LABELS: self-hosted,linux,x64
   DISABLE_AUTO_UPDATE: "1"
+  REPLACE_EXISTING_RUNNER: "true"
 
 services:
   # === kigurumi-event-hub (3台: CI + deploy系が多い, pnpm) ===
