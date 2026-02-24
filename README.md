@@ -2,6 +2,8 @@
 
 Docker Composeを使用してGitHub Actionsのセルフホステッドランナーをローカル環境で一括管理する構成です。
 
+`REPLACE_EXISTING_RUNNER`により、Docker Desktopのアップデート・再起動後も自動復旧します。
+
 ## 対象リポジトリ
 
 | リポジトリ               | ランナー数 | パッケージマネージャー | 備考                     |
@@ -61,12 +63,23 @@ docker compose down -v
 docker volume ls | grep github-runners
 ```
 
+## Docker Desktopアップデート後の復旧
+
+Docker Desktopのアップデートや強制再起動でランナーが停止した場合、以下のコマンドで復旧できます。
+
+```bash
+docker compose up -d
+```
+
+`REPLACE_EXISTING_RUNNER: "true"`により、古い設定ファイルが残っていても既存登録を上書きして再起動します。
+
 ## ファイル構成
 
 ```text
 .
 ├── .env.example        # 環境変数テンプレート
 ├── .env                # 環境変数（Git管理外）
+├── .gitattributes      # 改行コード設定
 ├── .gitignore
 ├── docker-compose.yml  # ランナー定義
 └── README.md
