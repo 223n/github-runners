@@ -80,7 +80,7 @@ function Start-DockerDesktop {
 function Invoke-ComposeStart {
     Start-DockerDesktop
     Write-Host "ランナーを起動しています..." -ForegroundColor Yellow
-    docker compose up -d
+    docker compose up -d --force-recreate
     if ($LASTEXITCODE -eq 0) {
         Write-Host "全ランナーの起動が完了しました。" -ForegroundColor Green
         docker compose ps

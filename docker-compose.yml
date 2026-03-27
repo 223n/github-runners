@@ -28,6 +28,7 @@ x-runner-env: &runner-env
   LABELS: self-hosted,linux,x64
   DISABLE_AUTO_UPDATE: "1"
   REPLACE_EXISTING_RUNNER: "true"
+  EPHEMERAL: "true"
 
 services:
   # === kigurumi-event-hub (3台: CI + deploy系が多い, pnpm) ===
