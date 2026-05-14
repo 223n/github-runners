@@ -18,7 +18,7 @@
 #   docker compose up -d  # REPLACE_EXISTING_RUNNER により自動復旧
 
 x-runner-base: &runner-base
-  image: myoung34/github-runner:ubuntu-jammy
+  image: myoung34/github-runner:latest
   restart: unless-stopped
   stop_grace_period: 30s
 
