@@ -79,6 +79,8 @@ function Start-DockerDesktop {
 
 function Invoke-ComposeStart {
     Start-DockerDesktop
+    Write-Host "ランナーの最新イメージを取得しています..." -ForegroundColor Yellow
+    docker pull myoung34/github-runner:latest
     Write-Host "ランナーを起動しています..." -ForegroundColor Yellow
     docker compose up -d
     if ($LASTEXITCODE -eq 0) {
