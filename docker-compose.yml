@@ -122,18 +122,6 @@ services:
       REPO_URL: https://github.com/223n/CatPro-Cloudflare
       RUNNER_NAME: local-catpro-cloudflare-2
 
-  # === sleep-diary (1台: ワークフローが少ない, pnpm) ===
-  runner-sleep-diary:
-    <<: *runner-base
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - sleep-toolcache:/opt/hostedtoolcache
-      - sleep-pnpm-store:/root/.local/share/pnpm/store
-    environment:
-      <<: *runner-env
-      REPO_URL: https://github.com/223n/sleep-diary
-      RUNNER_NAME: local-sleep-diary
-
   # === devcontainer-base (1台: 手動実行のみ) ===
   runner-devcontainer-base:
     <<: *runner-base
@@ -202,9 +190,6 @@ volumes:
   # CatPro-Cloudflare
   catpro-toolcache:
   catpro-pnpm-store:
-  # sleep-diary
-  sleep-toolcache:
-  sleep-pnpm-store:
   # devcontainer-base
   devcontainer-toolcache:
   # okusuri.223n.tech
