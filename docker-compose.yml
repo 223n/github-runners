@@ -156,6 +156,18 @@ services:
       REPO_URL: https://github.com/223n/okusuri.223n.tech
       RUNNER_NAME: local-okusuri-223n-tech-2
 
+  # === node_japanese_lint_template (1台: Lint中心, pnpm) ===
+  runner-node-japanese-lint-template:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - node-lint-toolcache:/opt/hostedtoolcache
+      - node-lint-pnpm-store:/root/.local/share/pnpm/store
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/node_japanese_lint_template
+      RUNNER_NAME: local-node-japanese-lint-template
+
   # === 223n-tech organization ===
   # === haru.223n.tech (2台: deploy + scheduled-build, pnpm) ===
   runner-haru-223n-tech-1:
@@ -195,6 +207,9 @@ volumes:
   # okusuri.223n.tech
   okusuri-toolcache:
   okusuri-pnpm-store:
+  # node_japanese_lint_template
+  node-lint-toolcache:
+  node-lint-pnpm-store:
   # haru.223n.tech
   haru-toolcache:
   haru-pnpm-store:

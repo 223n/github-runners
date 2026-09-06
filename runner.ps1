@@ -10,7 +10,7 @@
     .\runner.ps1 start
     .\runner.ps1 stop
     .\runner.ps1 status
-    .\runner.ps1 logs runner-sleep-diary
+    .\runner.ps1 logs runner-node-japanese-lint-template
     .\runner.ps1 restart
     .\runner.ps1 clean
 #>

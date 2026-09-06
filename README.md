@@ -6,15 +6,15 @@ Docker Composeを使用してGitHub Actionsのセルフホステッドランナ�
 
 ## 対象リポジトリ
 
-| リポジトリ               | ランナー数 | パッケージマネージャー | 備考                     |
-| ------------------------ | ---------- | ---------------------- | ------------------------ |
-| 223n/kigurumi-event-hub  | 3          | pnpm                   | CI + deploy              |
-| 223n/vehicle-management  | 3          | npm                    | CI + deploy              |
-| 223n/CatPro-Cloudflare   | 2          | pnpm                   | CI + E2E                 |
-| 223n/sleep-diary         | 1          | pnpm                   | ワークフローが少ない     |
-| 223n/devcontainer-base   | 1          | -                      | 手動実行のみ             |
-| 223n/okusuri.223n.tech   | 2          | pnpm                   | CI + deploy              |
-| 223n-tech/haru.223n.tech | 2          | pnpm                   | deploy + scheduled-build |
+| リポジトリ                       | ランナー数 | パッケージマネージャー | 備考                     |
+| -------------------------------- | ---------- | ---------------------- | ------------------------ |
+| 223n/kigurumi-event-hub          | 3          | pnpm                   | CI + deploy              |
+| 223n/vehicle-management          | 3          | npm                    | CI + deploy              |
+| 223n/CatPro-Cloudflare           | 2          | pnpm                   | CI + E2E                 |
+| 223n/devcontainer-base           | 1          | -                      | 手動実行のみ             |
+| 223n/okusuri.223n.tech           | 2          | pnpm                   | CI + deploy              |
+| 223n/node_japanese_lint_template | 1          | pnpm                   | 日本語Lintテンプレート   |
+| 223n-tech/haru.223n.tech         | 2          | pnpm                   | deploy + scheduled-build |
 
 合計: **14台**
 
@@ -48,7 +48,7 @@ docker compose up -d
 .\runner.ps1 restart            # ランナーを再起動
 .\runner.ps1 status             # ランナーの状態を表示
 .\runner.ps1 logs               # 全ランナーのログを表示
-.\runner.ps1 logs runner-sleep-diary  # 特定ランナーのログを表示
+.\runner.ps1 logs runner-node-japanese-lint-template  # 特定ランナーのログを表示
 .\runner.ps1 clean              # 停止 + キャッシュボリューム全削除
 ```
 
