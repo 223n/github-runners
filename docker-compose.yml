@@ -180,11 +180,12 @@ services:
       REPO_URL: https://github.com/223n-tech/haru.223n.tech
       RUNNER_NAME: local-haru-223n-tech-2
 
+  # === FursuitWeather_iMac (2台: CI + deploy, npm) ===
   runner-fursuit-weather-macos-1:
     <<: *runner-base
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - fursuit-weather-macos-toolcache:/opt/hostedtoolcache
+      - fursuitweather-imac-toolcache:/opt/hostedtoolcache
       - fursuit-weather-macos-npm-cache:/root/.npm
     environment:
       <<: *runner-env
@@ -220,6 +221,6 @@ volumes:
   # haru.223n.tech
   haru-toolcache:
   haru-pnpm-store:
-  # haru.223n.tech
+  # FursuitWeather_iMac
   fursuitweather-imac-toolcache:
   fursuit-weather-macos-npm-cache:
