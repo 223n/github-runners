@@ -54,7 +54,7 @@ CIランナーを各1台に絞っているのは、共有MySQLを使うためで
 
 ランナーを用意しただけでは動きません。各リポジトリのワークフローで次を行います。
 
-1. `runs-on`を`self-hosted`にする
+1. `runs-on`を`[self-hosted, ci]`にする
    （`CatPro-Cloudflare`のように`${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}`と
    書けば、リポジトリ変数の切り替えだけで戻せます）
 2. `services:`のブロックを削除する
@@ -69,6 +69,21 @@ CIランナーを各1台に絞っているのは、共有MySQLを使うためで
 依存更新もセキュリティ更新も止まったままになります。
 
 CI用ランナーとは別のコンテナーに分けています。CI実行中に依存更新が待たされるのを避けるためです。
+
+ただし**コンテナーを分けるだけでは不十分**です。ランナー登録時に`self-hosted`・
+`Linux`・`X64`はGitHubが自動で付与するため、Dependabot専用ランナーからこれらを
+外せません。ワークフローに`runs-on: self-hosted`と書くと、Dependabot専用ランナーも
+候補に入ります。
+
+区別するため、CI用ランナーには`ci`ラベルを付けています。ワークフロー側は
+`runs-on: [self-hosted, ci]`と書いてください。
+
+| ランナー | ラベル | 拾うジョブ |
+| -------- | ------ | ---------- |
+| CI用 | `self-hosted` `Linux` `X64` `ci` | `runs-on: [self-hosted, ci]` および `runs-on: self-hosted` |
+| Dependabot用 | `self-hosted` `Linux` `X64` `dependabot` | Dependabotのジョブ、および `runs-on: self-hosted` |
+
+`runs-on: self-hosted`のままでも動きますが、Dependabot用ランナーを占有しえます。
 
 ### 有効・無効の確認方法
 

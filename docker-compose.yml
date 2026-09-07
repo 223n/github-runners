@@ -26,10 +26,15 @@ x-runner-base: &runner-base
   restart: unless-stopped
   stop_grace_period: 30s
 
+# CI 用。ci ラベルを付けるのは Dependabot 専用ランナーと区別するため。
+# ランナー登録時に self-hosted / Linux / X64 は GitHub が自動で付与するので、
+# Dependabot 専用ランナーからこれらを外すことはできない。そのため
+# runs-on: self-hosted と書くと Dependabot 用ランナーも候補に入ってしまう。
+# 区別するには CI 側が持つラベルを足し、runs-on: [self-hosted, ci] と書く。
 x-runner-env: &runner-env
   ACCESS_TOKEN: ${GITHUB_PAT}
   RUNNER_WORKDIR: /tmp/runner/work
-  LABELS: self-hosted,linux,x64
+  LABELS: self-hosted,linux,x64,ci
   DISABLE_AUTO_UPDATE: "1"
   REPLACE_EXISTING_RUNNER: "true"
   EPHEMERAL: "true"
