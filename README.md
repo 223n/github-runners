@@ -13,13 +13,52 @@ Docker Composeを使用してGitHub Actionsのセルフホステッドランナ�
 | 223n/devcontainer-base    | 1    | -            | -                      | 手動実行のみ             |
 | 223n-tech/haru.223n.tech  | 2    | -            | pnpm                   | deploy + scheduled-build |
 | 223n/FursuitWeather_iMac  | 2    | -            | npm                    | CI + deploy              |
-| 223n/npo-tool             | -    | 1            | composer               | Dependabotのみ           |
-| 223n/sleep-diary-php      | -    | 1            | composer               | Dependabotのみ           |
+| 223n/npo-tool             | 1    | 1            | composer               | CI + Dependabot          |
+| 223n/sleep-diary-php      | 1    | 1            | composer               | CI + Dependabot          |
 | 223n/FursuitWeather_iOS   | -    | 1            | npm                    | Dependabotのみ           |
 
-合計: **15台**（CI用10台 + Dependabot用5台）
+合計: **17台**（CI用12台 + Dependabot用5台）と、CI用の共有MySQL 1台
 
 kigurumi-event-hubとokusuri.223n.techのランナーは、リポジトリがアーカイブされたため削除しました。
+
+## CI用の共有MySQL
+
+`npo-tool`と`sleep-diary-php`のCIはMySQLを必要とします。
+しかし**GitHub Actionsの`services:`は、この構成では使えません。**
+
+`services:`で起動したコンテナーのポートはDockerホスト側に公開されます。
+一方、ジョブはランナーコンテナーの中で動くため、ジョブから見た`127.0.0.1`は
+ランナーコンテナー自身を指します。両者がつながりません。
+docker.sockをマウントしてホストのDockerを操作する構成（docker-out-of-docker）に
+共通する制約です。
+
+そのため、常設のMySQLを同じcomposeネットワークへ置いています。
+composeの既定ネットワークではサービス名で名前解決できるため、
+ワークフローからは**ホスト名`mysql`**で参照します。
+
+データベースは`mysql-init/01-databases.sql`で作成します。
+ジョブを分離したい場合はここへ足して、ワークフロー側の接続先を向け替えてください。
+
+| データベース | 用途 |
+| ------------ | ---- |
+| `npo_tool_test` | npo-tool |
+| `sleep_diary_test` | sleep-diary-php |
+| `sleep_diary_test_lowest` / `_highest` | sleep-diary-php のマトリクス用 |
+| `sleep_diary_test_coverage` | sleep-diary-php のカバレッジ用 |
+
+CIランナーを各1台に絞っているのは、共有MySQLを使うためです。
+同一リポジトリのジョブが並走するとデータベースを取り合います。
+台数を増やす場合は、ジョブごとにデータベースを分けてください。
+
+### リポジトリ側に必要な変更
+
+ランナーを用意しただけでは動きません。各リポジトリのワークフローで次を行います。
+
+1. `runs-on`を`self-hosted`にする
+   （`CatPro-Cloudflare`のように`${{ vars.RUNNER_LABEL || 'ubuntu-latest' }}`と
+   書けば、リポジトリ変数の切り替えだけで戻せます）
+2. `services:`のブロックを削除する
+3. 接続先のホストを`127.0.0.1`から`mysql`へ変える
 
 ## Dependabotランナー
 
@@ -131,6 +170,7 @@ docker compose up -d
 ├── .gitattributes      # 改行コード設定
 ├── .gitignore
 ├── docker-compose.yml  # ランナー定義
+├── mysql-init/         # CI用MySQLの初期化SQL
 ├── runner.ps1          # 管理スクリプト（PowerShell）
 └── README.md
 ```
