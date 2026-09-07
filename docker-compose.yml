@@ -220,6 +220,60 @@ services:
       REPO_URL: https://github.com/223n/FursuitWeather_iOS
       RUNNER_NAME: local-fursuit-weather-ios-dependabot
 
+  # === CI用の共有 MySQL ===
+  # GitHub Actions の services: は、docker.sock をマウントしたコンテナー内
+  # ランナーでは使えない。サービスコンテナーのポートは Docker ホスト側に
+  # 公開される一方、ジョブから見た 127.0.0.1 はランナーコンテナー内を指すため、
+  # 両者がつながらない。
+  # そこで常設の MySQL を同じ compose ネットワークに置き、ワークフローからは
+  # ホスト名 mysql で参照する（compose の既定ネットワークで名前解決できる）。
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # === npo-tool (1台: CI。PHP + MySQL) ===
+  # 1台に絞ってジョブを直列化する。共有 MySQL を使うため、同一リポジトリの
+  # ジョブが並走するとデータベースを取り合う。
+  runner-npo-tool:
+    <<: *runner-base
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - npo-tool-ci-toolcache:/opt/hostedtoolcache
+      - npo-tool-composer-cache:/root/.composer/cache
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/npo-tool
+      RUNNER_NAME: local-npo-tool-ci
+
+  # === sleep-diary-php (1台: CI。PHP + MySQL) ===
+  runner-sleep-diary-php:
+    <<: *runner-base
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - sleep-diary-ci-toolcache:/opt/hostedtoolcache
+      - sleep-diary-ci-composer-cache:/root/.composer/cache
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/sleep-diary-php
+      RUNNER_NAME: local-sleep-diary-php-ci
+
 volumes:
   # vehicle-management
   vehicle-toolcache:
@@ -244,3 +298,10 @@ volumes:
   # FursuitWeather_iOS (Dependabot 専用)
   fursuitweather-ios-toolcache:
   fursuit-weather-ios-npm-cache:
+  # CI用の共有 MySQL
+  mysql-data:
+  # npo-tool (CI)
+  npo-tool-ci-toolcache:
+  # sleep-diary-php (CI)
+  sleep-diary-ci-toolcache:
+  sleep-diary-ci-composer-cache:
