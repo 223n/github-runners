@@ -30,41 +30,19 @@ x-runner-env: &runner-env
   REPLACE_EXISTING_RUNNER: "true"
   EPHEMERAL: "true"
 
+# Dependabot on self-hosted runners を有効にしたリポジトリ用。
+# Dependabot のジョブは runs-on を指定できず、"dependabot" ラベルを持つ
+# ランナーだけを探す。このラベルが無いとジョブはキューに滞留したまま
+# 24時間後にキャンセルされ、依存更新が一切行われない。
+x-runner-env-dependabot: &runner-env-dependabot
+  ACCESS_TOKEN: ${GITHUB_PAT}
+  RUNNER_WORKDIR: /tmp/runner/work
+  LABELS: self-hosted,linux,x64,dependabot
+  DISABLE_AUTO_UPDATE: "1"
+  REPLACE_EXISTING_RUNNER: "true"
+  EPHEMERAL: "true"
+
 services:
-  # === kigurumi-event-hub (3台: CI + deploy系が多い, pnpm) ===
-  runner-kigurumi-event-hub-1:
-    <<: *runner-base
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - kigurumi-toolcache:/opt/hostedtoolcache
-      - kigurumi-pnpm-store:/root/.local/share/pnpm/store
-    environment:
-      <<: *runner-env
-      REPO_URL: https://github.com/223n/kigurumi-event-hub
-      RUNNER_NAME: local-kigurumi-event-hub-1
-
-  runner-kigurumi-event-hub-2:
-    <<: *runner-base
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - kigurumi-toolcache:/opt/hostedtoolcache
-      - kigurumi-pnpm-store:/root/.local/share/pnpm/store
-    environment:
-      <<: *runner-env
-      REPO_URL: https://github.com/223n/kigurumi-event-hub
-      RUNNER_NAME: local-kigurumi-event-hub-2
-
-  runner-kigurumi-event-hub-3:
-    <<: *runner-base
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - kigurumi-toolcache:/opt/hostedtoolcache
-      - kigurumi-pnpm-store:/root/.local/share/pnpm/store
-    environment:
-      <<: *runner-env
-      REPO_URL: https://github.com/223n/kigurumi-event-hub
-      RUNNER_NAME: local-kigurumi-event-hub-3
-
   # === vehicle-management (3台: CI + deploy系が多い, npm) ===
   runner-vehicle-management-1:
     <<: *runner-base
@@ -133,29 +111,6 @@ services:
       REPO_URL: https://github.com/223n/devcontainer-base
       RUNNER_NAME: local-devcontainer-base
 
-  # === okusuri.223n.tech (2台: CI + deploy, pnpm) ===
-  runner-okusuri-223n-tech-1:
-    <<: *runner-base
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - okusuri-toolcache:/opt/hostedtoolcache
-      - okusuri-pnpm-store:/root/.local/share/pnpm/store
-    environment:
-      <<: *runner-env
-      REPO_URL: https://github.com/223n/okusuri.223n.tech
-      RUNNER_NAME: local-okusuri-223n-tech-1
-
-  runner-okusuri-223n-tech-2:
-    <<: *runner-base
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - okusuri-toolcache:/opt/hostedtoolcache
-      - okusuri-pnpm-store:/root/.local/share/pnpm/store
-    environment:
-      <<: *runner-env
-      REPO_URL: https://github.com/223n/okusuri.223n.tech
-      RUNNER_NAME: local-okusuri-223n-tech-2
-
   # === 223n-tech organization ===
   # === haru.223n.tech (2台: deploy + scheduled-build, pnpm) ===
   runner-haru-223n-tech-1:
@@ -203,10 +158,65 @@ services:
       REPO_URL: https://github.com/223n/FursuitWeather_iMac
       RUNNER_NAME: local-fursuit-weather-imac-2
 
+  # === Dependabot 専用ランナー ===
+  # 下記リポジトリは "Dependabot on self-hosted runners" が有効になっている。
+  # CI 用ランナーとは別に立てることで、CI の空き待ちで依存更新が滞らないようにする。
+  runner-catpro-cloudflare-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - catpro-toolcache:/opt/hostedtoolcache
+      - catpro-pnpm-store:/root/.local/share/pnpm/store
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/CatPro-Cloudflare
+      RUNNER_NAME: local-catpro-cloudflare-dependabot
+
+  runner-vehicle-management-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vehicle-toolcache:/opt/hostedtoolcache
+      - vehicle-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/vehicle-management
+      RUNNER_NAME: local-vehicle-management-dependabot
+
+  runner-npo-tool-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - npo-tool-toolcache:/opt/hostedtoolcache
+      - npo-tool-composer-cache:/root/.composer/cache
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/npo-tool
+      RUNNER_NAME: local-npo-tool-dependabot
+
+  runner-sleep-diary-php-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - sleep-diary-toolcache:/opt/hostedtoolcache
+      - sleep-diary-composer-cache:/root/.composer/cache
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/sleep-diary-php
+      RUNNER_NAME: local-sleep-diary-php-dependabot
+
+  runner-fursuit-weather-ios-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - fursuitweather-ios-toolcache:/opt/hostedtoolcache
+      - fursuit-weather-ios-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/FursuitWeather_iOS
+      RUNNER_NAME: local-fursuit-weather-ios-dependabot
+
 volumes:
-  # kigurumi-event-hub
-  kigurumi-toolcache:
-  kigurumi-pnpm-store:
   # vehicle-management
   vehicle-toolcache:
   vehicle-npm-cache:
@@ -215,12 +225,18 @@ volumes:
   catpro-pnpm-store:
   # devcontainer-base
   devcontainer-toolcache:
-  # okusuri.223n.tech
-  okusuri-toolcache:
-  okusuri-pnpm-store:
   # haru.223n.tech
   haru-toolcache:
   haru-pnpm-store:
   # FursuitWeather_iMac
   fursuitweather-imac-toolcache:
   fursuit-weather-macos-npm-cache:
+  # npo-tool (Dependabot 専用)
+  npo-tool-toolcache:
+  npo-tool-composer-cache:
+  # sleep-diary-php (Dependabot 専用)
+  sleep-diary-toolcache:
+  sleep-diary-composer-cache:
+  # FursuitWeather_iOS (Dependabot 専用)
+  fursuitweather-ios-toolcache:
+  fursuit-weather-ios-npm-cache:

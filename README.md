@@ -6,17 +6,44 @@ Docker Composeを使用してGitHub Actionsのセルフホステッドランナ�
 
 ## 対象リポジトリ
 
-| リポジトリ               | ランナー数 | パッケージマネージャー | 備考                     |
-| ------------------------ | ---------- | ---------------------- | ------------------------ |
-| 223n/kigurumi-event-hub  | 3          | pnpm                   | CI + deploy              |
-| 223n/vehicle-management  | 3          | npm                    | CI + deploy              |
-| 223n/CatPro-Cloudflare   | 2          | pnpm                   | CI + E2E                 |
-| 223n/sleep-diary         | 1          | pnpm                   | ワークフローが少ない     |
-| 223n/devcontainer-base   | 1          | -                      | 手動実行のみ             |
-| 223n/okusuri.223n.tech   | 2          | pnpm                   | CI + deploy              |
-| 223n-tech/haru.223n.tech | 2          | pnpm                   | deploy + scheduled-build |
+| リポジトリ                | CI用 | Dependabot用 | パッケージマネージャー | 備考                     |
+| ------------------------- | ---- | ------------ | ---------------------- | ------------------------ |
+| 223n/vehicle-management   | 3    | 1            | npm                    | CI + deploy              |
+| 223n/CatPro-Cloudflare    | 2    | 1            | pnpm                   | CI + E2E                 |
+| 223n/devcontainer-base    | 1    | -            | -                      | 手動実行のみ             |
+| 223n-tech/haru.223n.tech  | 2    | -            | pnpm                   | deploy + scheduled-build |
+| 223n/FursuitWeather_iMac  | 2    | -            | npm                    | CI + deploy              |
+| 223n/npo-tool             | -    | 1            | composer               | Dependabotのみ           |
+| 223n/sleep-diary-php      | -    | 1            | composer               | Dependabotのみ           |
+| 223n/FursuitWeather_iOS   | -    | 1            | npm                    | Dependabotのみ           |
 
-合計: **14台**
+合計: **15台**（CI用10台 + Dependabot用5台）
+
+kigurumi-event-hubとokusuri.223n.techのランナーは、リポジトリがアーカイブされたため削除しました。
+
+## Dependabotランナー
+
+`Dependabot on self-hosted runners`を有効にしたリポジトリでは、Dependabotのジョブが
+**`dependabot`ラベルを持つランナーだけ**を探します。通常のワークフローと違い`runs-on`を
+指定できないため、このラベルを持つランナーが1台も無いとジョブはキューに滞留したまま
+24時間後にキャンセルされます。失敗として通知されないため気付きにくく、
+依存更新もセキュリティ更新も止まったままになります。
+
+CI用ランナーとは別のコンテナーに分けています。CI実行中に依存更新が待たされるのを避けるためです。
+
+### 有効・無効の確認方法
+
+```bash
+# ジョブが要求しているラベルを確認する
+gh api "repos/<owner>/<repo>/actions/runs?per_page=20" --jq '.workflow_runs[] | select(.name | startswith("npm_and_yarn")) | "\(.created_at) \(.conclusion)"'
+
+# 登録済みランナーのラベルを確認する
+gh api "repos/<owner>/<repo>/actions/runners" --jq '.runners[] | "\(.name) \(.labels | map(.name) | join(","))"'
+```
+
+ジョブ側が`dependabot`ラベルを要求しているのにランナー側に無ければ、この構成に追加します。
+セルフホストで動かす必要が無いリポジトリなら、リポジトリのSettings > Code security >
+`Dependabot on self-hosted runners`を無効にしてGitHubホステッドランナーへ戻す方法もあります。
 
 ## 前提条件
 
