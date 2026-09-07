@@ -96,6 +96,22 @@ docker compose down
 docker volume ls | grep github-runners
 ```
 
+## ランナーイメージ
+
+`myoung34/github-runner:ubuntu-noble`（Ubuntu 24.04 / glibc 2.39）を使用します。
+
+`latest`タグはUbuntu 20.04ベース（glibc 2.31）で、`@cloudflare/workerd-linux-64`が要求する
+`GLIBC_2.32`〜`GLIBC_2.35`を満たしません。この状態では`vitest-pool-workers`を使うテストが
+workerdを起動できず、`Test Files: no tests`のまま失敗します。
+
+イメージを更新する場合は明示的にpullします。`docker compose up -d`だけでは
+取得済みイメージが再利用され、タグを変えても反映されません。
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
 ## Docker Desktopアップデート後の復旧
 
 Docker Desktopのアップデートや強制再起動でランナーが停止した場合、以下のコマンドで復旧できます。

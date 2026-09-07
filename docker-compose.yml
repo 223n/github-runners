@@ -18,7 +18,11 @@
 #   docker compose up -d  # REPLACE_EXISTING_RUNNER により自動復旧
 
 x-runner-base: &runner-base
-  image: myoung34/github-runner:latest
+  # latest は Ubuntu 20.04 ベース（glibc 2.31）で、@cloudflare/workerd-linux-64 が
+  # 要求する GLIBC_2.32〜2.35 を満たさない。CatPro-Cloudflare の
+  # vitest-pool-workers が workerd を起動できず、テストが1件も走らないまま
+  # 失敗していた。glibc 2.39 の Ubuntu 24.04 ベースを明示指定する。
+  image: myoung34/github-runner:ubuntu-noble
   restart: unless-stopped
   stop_grace_period: 30s
 
