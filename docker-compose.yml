@@ -180,6 +180,28 @@ services:
       REPO_URL: https://github.com/223n-tech/haru.223n.tech
       RUNNER_NAME: local-haru-223n-tech-2
 
+  runner-fursuit-weather-macos-1:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - fursuit-weather-macos-toolcache:/opt/hostedtoolcache
+      - fursuit-weather-macos-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/FursuitWeather_iMac
+      RUNNER_NAME: local-fursuit-weather-imac-1
+
+  runner-fursuit-weather-macos-2:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - fursuitweather-imac-toolcache:/opt/hostedtoolcache
+      - fursuit-weather-macos-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/FursuitWeather_iMac
+      RUNNER_NAME: local-fursuit-weather-imac-2
+
 volumes:
   # kigurumi-event-hub
   kigurumi-toolcache:
@@ -198,3 +220,6 @@ volumes:
   # haru.223n.tech
   haru-toolcache:
   haru-pnpm-store:
+  # haru.223n.tech
+  fursuitweather-imac-toolcache:
+  fursuit-weather-macos-npm-cache:
