@@ -167,6 +167,30 @@ services:
       REPO_URL: https://github.com/223n/FursuitWeather_iMac
       RUNNER_NAME: local-fursuit-weather-imac-2
 
+  # === NightDream (2台: CI。node 22 と 24 の matrix、npm) ===
+  # matrix が2ジョブ同時に走るため、1台だと片方が待たされる。
+  runner-nightdream-1:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - nightdream-toolcache:/opt/hostedtoolcache
+      - nightdream-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/NightDream
+      RUNNER_NAME: local-nightdream-1
+
+  runner-nightdream-2:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - nightdream-toolcache:/opt/hostedtoolcache
+      - nightdream-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/NightDream
+      RUNNER_NAME: local-nightdream-2
+
   # === Dependabot 専用ランナー ===
   # 下記リポジトリは "Dependabot on self-hosted runners" が有効になっている。
   # CI 用ランナーとは別に立てることで、CI の空き待ちで依存更新が滞らないようにする。
@@ -224,6 +248,30 @@ services:
       <<: *runner-env-dependabot
       REPO_URL: https://github.com/223n/FursuitWeather_iOS
       RUNNER_NAME: local-fursuit-weather-ios-dependabot
+
+  runner-nightdream-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - nightdream-toolcache:/opt/hostedtoolcache
+      - nightdream-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/NightDream
+      RUNNER_NAME: local-nightdream-dependabot
+
+  # MyHealth の CI は別ホストの macOS ランナーが拾う（Swift のビルドに必要）。
+  # Dependabot のジョブは Linux x64 でしか動かないため、ここに置く。
+  runner-myhealth-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - myhealth-toolcache:/opt/hostedtoolcache
+      - myhealth-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/MyHealth
+      RUNNER_NAME: local-myhealth-dependabot
 
   # === CI用の共有 MySQL ===
   # GitHub Actions の services: は、docker.sock をマウントしたコンテナー内
@@ -303,6 +351,12 @@ volumes:
   # FursuitWeather_iOS (Dependabot 専用)
   fursuitweather-ios-toolcache:
   fursuit-weather-ios-npm-cache:
+  # NightDream (CI + Dependabot)
+  nightdream-toolcache:
+  nightdream-npm-cache:
+  # MyHealth (Dependabot 専用)
+  myhealth-toolcache:
+  myhealth-npm-cache:
   # CI用の共有 MySQL
   mysql-data:
   # npo-tool (CI)
