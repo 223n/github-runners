@@ -16,6 +16,8 @@ Docker Composeを使用してGitHub Actionsのセルフホステッドランナ�
 | 223n/npo-tool             | 1    | 1            | composer               | CI + Dependabot          |
 | 223n/sleep-diary-php      | 1    | 1            | composer               | CI + Dependabot          |
 | 223n/FursuitWeather_iOS   | -    | 1            | npm                    | Dependabotのみ           |
+| 223n/NightDream           | 2    | 1            | npm                    | CI (node 22/24 matrix)   |
+| 223n/MyHealth             | -    | 1            | npm                    | CIは別ホストのmacOS      |
 
 合計: **17台**（CI用12台 + Dependabot用5台）と、CI用の共有MySQL 1台
 
