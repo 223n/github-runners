@@ -181,6 +181,8 @@ docker compose pull
 docker compose up -d
 ```
 
+`runner.ps1 start`は、起動前に`docker compose pull`で最新イメージを取得します。
+
 ## Docker Desktopアップデート後の復旧
 
 Docker Desktopのアップデートや強制再起動でランナーが停止した場合、以下のコマンドで復旧できます。
