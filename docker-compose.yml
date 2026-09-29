@@ -21,8 +21,8 @@ x-runner-base: &runner-base
   # latest は Ubuntu 20.04 ベース（glibc 2.31）で、@cloudflare/workerd-linux-64 が
   # 要求する GLIBC_2.32〜2.35 を満たさない。CatPro-Cloudflare の
   # vitest-pool-workers が workerd を起動できず、テストが1件も走らないまま
-  # 失敗していた。glibc 2.39 の Ubuntu 24.04 ベースを明示指定する。
-  image: myoung34/github-runner:ubuntu-noble
+  # 失敗していた。glibc 2.43 の Ubuntu 26.04 ベースを明示指定する。
+  image: myoung34/github-runner:ubuntu-resolute
   restart: unless-stopped
   stop_grace_period: 30s
 
@@ -281,7 +281,9 @@ services:
   # そこで常設の MySQL を同じ compose ネットワークに置き、ワークフローからは
   # ホスト名 mysql で参照する（compose の既定ネットワークで名前解決できる）。
   mysql:
-    image: mysql:8.0
+    # 8.0 は 2026年4月で EOL のため 8.4 LTS を使う。8.0 で作ったデータボリュームは
+    # 8.4 の初回起動時に自動でアップグレードされ、8.0 には戻せない（README 参照）。
+    image: mysql:8.4.11
     restart: unless-stopped
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
     environment:

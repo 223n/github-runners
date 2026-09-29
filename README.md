@@ -62,6 +62,19 @@ CIランナーを各1台に絞っているのは、共有MySQLを使うためで
 2. `services:`のブロックを削除する
 3. 接続先のホストを`127.0.0.1`から`mysql`へ変える
 
+### MySQLのバージョン
+
+MySQL 8.4 LTS（`mysql:8.4.11`）を使用します。
+8.0は2026年4月にサポートが終了したため、8.4へ移行しました。
+
+8.0で作成したデータボリューム（`github-runners_mysql-data`）は、8.4の初回起動時に自動でアップグレードされます。
+アップグレード後は8.0で起動できません。
+8.0へ戻す場合は、ボリュームを削除して作り直します。
+中身はCI用のテストデータベースだけなので、初期化SQLで再作成されます。
+
+8.4では`mysql_native_password`認証プラグインが既定で無効です。
+`mysql-init/01-databases.sql`で作成するユーザーは既定の`caching_sha2_password`を使うため、影響はありません。
+
 ## Dependabotランナー
 
 `Dependabot on self-hosted runners`を有効にしたリポジトリでは、Dependabotのジョブが
@@ -154,7 +167,7 @@ docker volume ls | grep github-runners
 
 ## ランナーイメージ
 
-`myoung34/github-runner:ubuntu-noble`（Ubuntu 24.04 / glibc 2.39）を使用します。
+`myoung34/github-runner:ubuntu-resolute`（Ubuntu 26.04 / glibc 2.43）を使用します。
 
 `latest`タグはUbuntu 20.04ベース（glibc 2.31）で、`@cloudflare/workerd-linux-64`が要求する
 `GLIBC_2.32`〜`GLIBC_2.35`を満たしません。この状態では`vitest-pool-workers`を使うテストが
