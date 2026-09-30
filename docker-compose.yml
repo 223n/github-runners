@@ -191,6 +191,32 @@ services:
       REPO_URL: https://github.com/223n/NightDream
       RUNNER_NAME: local-nightdream-2
 
+  # === vrm-haru (2台: CI。文書の検査・ワークフローの検査・CodeQL、npm) ===
+  # ワークフローは runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }} で書かれている。
+  # リポジトリ変数 RUNS_ON に ci を入れると、この2台だけが拾う。
+  # push のたびに CI の3ジョブが並んで走るため、1台だと待ちが長くなる。
+  runner-vrm-haru-1:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vrm-haru-toolcache:/opt/hostedtoolcache
+      - vrm-haru-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/vrm-haru
+      RUNNER_NAME: local-vrm-haru-1
+
+  runner-vrm-haru-2:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vrm-haru-toolcache:/opt/hostedtoolcache
+      - vrm-haru-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/vrm-haru
+      RUNNER_NAME: local-vrm-haru-2
+
   # === Dependabot 専用ランナー ===
   # 下記リポジトリは "Dependabot on self-hosted runners" が有効になっている。
   # CI 用ランナーとは別に立てることで、CI の空き待ちで依存更新が滞らないようにする。
@@ -272,6 +298,19 @@ services:
       <<: *runner-env-dependabot
       REPO_URL: https://github.com/223n/MyHealth
       RUNNER_NAME: local-myhealth-dependabot
+
+  # vrm-haru の dependabot.yml は npm と GitHub Actions を毎週更新する。
+  # リポジトリの設定で "Dependabot on self-hosted runners" を有効にすると、ここが拾う。
+  runner-vrm-haru-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vrm-haru-toolcache:/opt/hostedtoolcache
+      - vrm-haru-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/vrm-haru
+      RUNNER_NAME: local-vrm-haru-dependabot
 
   # === CI用の共有 MySQL ===
   # GitHub Actions の services: は、docker.sock をマウントしたコンテナー内
@@ -359,6 +398,9 @@ volumes:
   # MyHealth (Dependabot 専用)
   myhealth-toolcache:
   myhealth-npm-cache:
+  # vrm-haru (CI + Dependabot)
+  vrm-haru-toolcache:
+  vrm-haru-npm-cache:
   # CI用の共有 MySQL
   mysql-data:
   # npo-tool (CI)
