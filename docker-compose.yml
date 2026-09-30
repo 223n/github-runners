@@ -200,31 +200,33 @@ services:
   # 解決されるため、そのままでは空のフォルダーが見えて "no inputs collected" で失敗する。
   # そこで作業フォルダーを、ホストとコンテナーで同じパスにマウントする。
   # パスはランナーごとに分ける（同じパスだと2台のジョブが同じフォルダーを使う）。
+  # /tmp は使わない。Docker Desktop の VM では /tmp が noexec の tmpfs で、
+  # アクションのスクリプトや npm ci が入れたコマンドを実行できず、終了コード 126 になる。
   runner-vrm-haru-1:
     <<: *runner-base
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/github-runners/vrm-haru-1:/tmp/github-runners/vrm-haru-1
+      - /var/lib/github-runners/vrm-haru-1:/var/lib/github-runners/vrm-haru-1
       - vrm-haru-toolcache:/opt/hostedtoolcache
       - vrm-haru-npm-cache:/root/.npm
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/223n/vrm-haru
       RUNNER_NAME: local-vrm-haru-1
-      RUNNER_WORKDIR: /tmp/github-runners/vrm-haru-1
+      RUNNER_WORKDIR: /var/lib/github-runners/vrm-haru-1
 
   runner-vrm-haru-2:
     <<: *runner-base
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/github-runners/vrm-haru-2:/tmp/github-runners/vrm-haru-2
+      - /var/lib/github-runners/vrm-haru-2:/var/lib/github-runners/vrm-haru-2
       - vrm-haru-toolcache:/opt/hostedtoolcache
       - vrm-haru-npm-cache:/root/.npm
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/223n/vrm-haru
       RUNNER_NAME: local-vrm-haru-2
-      RUNNER_WORKDIR: /tmp/github-runners/vrm-haru-2
+      RUNNER_WORKDIR: /var/lib/github-runners/vrm-haru-2
 
   # === Dependabot 専用ランナー ===
   # 下記リポジトリは "Dependabot on self-hosted runners" が有効になっている。
