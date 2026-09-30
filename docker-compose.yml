@@ -195,27 +195,36 @@ services:
   # ワークフローは runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }} で書かれている。
   # リポジトリ変数 RUNS_ON に ci を入れると、この2台だけが拾う。
   # push のたびに CI の3ジョブが並んで走るため、1台だと待ちが長くなる。
+  # 安全性検査の zizmor-action はジョブの中で docker run -v を使う。docker.sock を
+  # 共有するこの構成では、-v に渡すパスが Docker ホスト（Docker Desktop の VM）側で
+  # 解決されるため、そのままでは空のフォルダーが見えて "no inputs collected" で失敗する。
+  # そこで作業フォルダーを、ホストとコンテナーで同じパスにマウントする。
+  # パスはランナーごとに分ける（同じパスだと2台のジョブが同じフォルダーを使う）。
   runner-vrm-haru-1:
     <<: *runner-base
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/github-runners/vrm-haru-1:/tmp/github-runners/vrm-haru-1
       - vrm-haru-toolcache:/opt/hostedtoolcache
       - vrm-haru-npm-cache:/root/.npm
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/223n/vrm-haru
       RUNNER_NAME: local-vrm-haru-1
+      RUNNER_WORKDIR: /tmp/github-runners/vrm-haru-1
 
   runner-vrm-haru-2:
     <<: *runner-base
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/github-runners/vrm-haru-2:/tmp/github-runners/vrm-haru-2
       - vrm-haru-toolcache:/opt/hostedtoolcache
       - vrm-haru-npm-cache:/root/.npm
     environment:
       <<: *runner-env
       REPO_URL: https://github.com/223n/vrm-haru
       RUNNER_NAME: local-vrm-haru-2
+      RUNNER_WORKDIR: /tmp/github-runners/vrm-haru-2
 
   # === Dependabot 専用ランナー ===
   # 下記リポジトリは "Dependabot on self-hosted runners" が有効になっている。
