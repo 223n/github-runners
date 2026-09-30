@@ -21,8 +21,8 @@ x-runner-base: &runner-base
   # latest は Ubuntu 20.04 ベース（glibc 2.31）で、@cloudflare/workerd-linux-64 が
   # 要求する GLIBC_2.32〜2.35 を満たさない。CatPro-Cloudflare の
   # vitest-pool-workers が workerd を起動できず、テストが1件も走らないまま
-  # 失敗していた。glibc 2.39 の Ubuntu 24.04 ベースを明示指定する。
-  image: myoung34/github-runner:ubuntu-noble
+  # 失敗していた。glibc 2.43 の Ubuntu 26.04 ベースを明示指定する。
+  image: myoung34/github-runner:ubuntu-resolute
   restart: unless-stopped
   stop_grace_period: 30s
 
@@ -191,6 +191,32 @@ services:
       REPO_URL: https://github.com/223n/NightDream
       RUNNER_NAME: local-nightdream-2
 
+  # === vrm-haru (2台: CI。文書の検査・ワークフローの検査・CodeQL、npm) ===
+  # ワークフローは runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }} で書かれている。
+  # リポジトリ変数 RUNS_ON に ci を入れると、この2台だけが拾う。
+  # push のたびに CI の3ジョブが並んで走るため、1台だと待ちが長くなる。
+  runner-vrm-haru-1:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vrm-haru-toolcache:/opt/hostedtoolcache
+      - vrm-haru-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/vrm-haru
+      RUNNER_NAME: local-vrm-haru-1
+
+  runner-vrm-haru-2:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vrm-haru-toolcache:/opt/hostedtoolcache
+      - vrm-haru-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/vrm-haru
+      RUNNER_NAME: local-vrm-haru-2
+
   # === Dependabot 専用ランナー ===
   # 下記リポジトリは "Dependabot on self-hosted runners" が有効になっている。
   # CI 用ランナーとは別に立てることで、CI の空き待ちで依存更新が滞らないようにする。
@@ -273,6 +299,19 @@ services:
       REPO_URL: https://github.com/223n/MyHealth
       RUNNER_NAME: local-myhealth-dependabot
 
+  # vrm-haru の dependabot.yml は npm と GitHub Actions を毎週更新する。
+  # リポジトリの設定で "Dependabot on self-hosted runners" を有効にすると、ここが拾う。
+  runner-vrm-haru-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - vrm-haru-toolcache:/opt/hostedtoolcache
+      - vrm-haru-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/vrm-haru
+      RUNNER_NAME: local-vrm-haru-dependabot
+
   # === CI用の共有 MySQL ===
   # GitHub Actions の services: は、docker.sock をマウントしたコンテナー内
   # ランナーでは使えない。サービスコンテナーのポートは Docker ホスト側に
@@ -281,7 +320,9 @@ services:
   # そこで常設の MySQL を同じ compose ネットワークに置き、ワークフローからは
   # ホスト名 mysql で参照する（compose の既定ネットワークで名前解決できる）。
   mysql:
-    image: mysql:8.0
+    # 8.0 は 2026年4月で EOL のため 8.4 LTS を使う。8.0 で作ったデータボリュームは
+    # 8.4 の初回起動時に自動でアップグレードされ、8.0 には戻せない（README 参照）。
+    image: mysql:8.4.11
     restart: unless-stopped
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
     environment:
@@ -357,6 +398,9 @@ volumes:
   # MyHealth (Dependabot 専用)
   myhealth-toolcache:
   myhealth-npm-cache:
+  # vrm-haru (CI + Dependabot)
+  vrm-haru-toolcache:
+  vrm-haru-npm-cache:
   # CI用の共有 MySQL
   mysql-data:
   # npo-tool (CI)
