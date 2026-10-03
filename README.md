@@ -19,11 +19,12 @@ Docker Composeを使用してGitHub Actionsのセルフホステッドランナ�
 | 223n/NightDream           | 2    | 1            | npm                    | CI (node 22/24 matrix)   |
 | 223n/MyHealth             | -    | 1            | npm                    | CIは別ホストのmacOS      |
 | 223n/vrm-haru             | 2    | 1            | npm                    | CI + CodeQL + リリース   |
+| 223n/kiguphoto            | 2    | 1            | npm                    | CI + CodeQL + リリース   |
 
-合計: **24台**（CI用16台 + Dependabot用8台）と、CI用の共有MySQL 1台
+合計: **27台**（CI用18台 + Dependabot用9台）と、CI用の共有MySQL 1台
 
-`223n/vrm-haru`のワークフローは`runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}`で書かれています。
-リポジトリ変数`RUNS_ON`に`ci`を設定すると、CI用の2台が拾います。
+`223n/vrm-haru`と`223n/kiguphoto`のワークフローは`runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}`で書かれています。
+それぞれのリポジトリ変数`RUNS_ON`に`ci`を設定すると、そのリポジトリのCI用の2台が拾います。
 
 kigurumi-event-hubとokusuri.223n.techのランナーは、リポジトリがアーカイブされたため削除しました。
 

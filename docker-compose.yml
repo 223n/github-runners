@@ -228,6 +228,39 @@ services:
       RUNNER_NAME: local-vrm-haru-2
       RUNNER_WORKDIR: /var/lib/github-runners/vrm-haru-2
 
+  # === kiguphoto (2台: CI。文書の検査・ワークフローの検査・CodeQL、npm) ===
+  # vrm-haru と同じテンプレートから作ったリポジトリで、ワークフローも
+  # runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }} で書かれている。
+  # リポジトリ変数 RUNS_ON に ci を入れると、この2台だけが拾う。
+  # private で無料プランのため、GitHub ホストランナーでは Actions の時間の枠を使う。
+  # 作業フォルダーの置き方は vrm-haru と同じ（zizmor-action の docker run -v のため、
+  # ホストとコンテナーで同じパスにし、/tmp は避ける）。
+  runner-kiguphoto-1:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/github-runners/kiguphoto-1:/var/lib/github-runners/kiguphoto-1
+      - kiguphoto-toolcache:/opt/hostedtoolcache
+      - kiguphoto-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/kiguphoto
+      RUNNER_NAME: local-kiguphoto-1
+      RUNNER_WORKDIR: /var/lib/github-runners/kiguphoto-1
+
+  runner-kiguphoto-2:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/github-runners/kiguphoto-2:/var/lib/github-runners/kiguphoto-2
+      - kiguphoto-toolcache:/opt/hostedtoolcache
+      - kiguphoto-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env
+      REPO_URL: https://github.com/223n/kiguphoto
+      RUNNER_NAME: local-kiguphoto-2
+      RUNNER_WORKDIR: /var/lib/github-runners/kiguphoto-2
+
   # === Dependabot 専用ランナー ===
   # 下記リポジトリは "Dependabot on self-hosted runners" が有効になっている。
   # CI 用ランナーとは別に立てることで、CI の空き待ちで依存更新が滞らないようにする。
@@ -323,6 +356,19 @@ services:
       REPO_URL: https://github.com/223n/vrm-haru
       RUNNER_NAME: local-vrm-haru-dependabot
 
+  # kiguphoto の dependabot.yml は npm と GitHub Actions を毎週更新する。
+  # リポジトリの設定で "Dependabot on self-hosted runners" を有効にすると、ここが拾う。
+  runner-kiguphoto-dependabot:
+    <<: *runner-base
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kiguphoto-toolcache:/opt/hostedtoolcache
+      - kiguphoto-npm-cache:/root/.npm
+    environment:
+      <<: *runner-env-dependabot
+      REPO_URL: https://github.com/223n/kiguphoto
+      RUNNER_NAME: local-kiguphoto-dependabot
+
   # === CI用の共有 MySQL ===
   # GitHub Actions の services: は、docker.sock をマウントしたコンテナー内
   # ランナーでは使えない。サービスコンテナーのポートは Docker ホスト側に
@@ -412,6 +458,9 @@ volumes:
   # vrm-haru (CI + Dependabot)
   vrm-haru-toolcache:
   vrm-haru-npm-cache:
+  # kiguphoto (CI + Dependabot)
+  kiguphoto-toolcache:
+  kiguphoto-npm-cache:
   # CI用の共有 MySQL
   mysql-data:
   # npo-tool (CI)
